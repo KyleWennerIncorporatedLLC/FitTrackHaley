@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>FitTrack — Haley</title>
+<title>Kyle Fitness Tracking</title>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 /* ─── RESET & TOKENS ─────────────────────────────── */
@@ -336,7 +336,7 @@ nav {
 /* ─── DASHBOARD GRID ──────────────────────────────── */
 .dash-grid {
   display: grid;
-  grid-template-columns: 1fr 1fr 1fr 300px;
+  grid-template-columns: 1fr 1fr 1fr 1fr;
   gap: 16px;
 }
 
@@ -386,7 +386,6 @@ nav {
 }
 
 /* ─── HEATMAP CARD ────────────────────────────────── */
-.heatmap-card { grid-column: 1 / 4; }
 .heatmap-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
 .streak-badge {
   display: flex; align-items: center; gap: 8px;
@@ -422,8 +421,7 @@ nav {
 .legend-dot { width: 10px; height: 10px; border-radius: 3px; }
 
 /* ─── SIDE PANEL ──────────────────────────────────── */
-.side-panel { grid-column: 4 / 5; grid-row: 1 / 5; display: flex; flex-direction: column; gap: 16px; }
-
+.side-panel { display: none; }  
 /* ─── LEADERBOARD ─────────────────────────────────── */
 .vs-title {
   font-family: 'Bebas Neue', sans-serif;
@@ -463,7 +461,6 @@ svg.ring-svg { transform: rotate(-90deg); }
 .badge-item.earned .badge-label { color: var(--lime); }
 
 /* ─── RECENT WORKOUTS TABLE ───────────────────────── */
-.workouts-card { grid-column: 1 / 4; }
 .workout-table { width: 100%; border-collapse: collapse; margin-top: 8px; }
 .workout-table th {
   text-align: left; font-size: 0.6rem; font-weight: 800;
@@ -491,7 +488,7 @@ svg.ring-svg { transform: rotate(-90deg); }
 .intensity-dot.filled { background: var(--lime); }
 
 /* ─── WEIGHT CHART ────────────────────────────────── */
-.weight-chart-card { }
+.weight-chart-card { grid-column: 1 / 3; }
 .mini-chart-wrap { margin-top: 8px; position: relative; }
 .chart-svg { width: 100%; overflow: visible; }
 .chart-empty { font-size: 0.75rem; color: var(--muted); text-align: center; padding: 30px 0; font-family: 'JetBrains Mono', monospace; }
@@ -627,6 +624,85 @@ svg.ring-svg { transform: rotate(-90deg); }
 ::-webkit-scrollbar { width: 4px; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: var(--s3); border-radius: 4px; }
+
+  /* ─── SETTINGS ────────────────────────────────────── */
+.vitamin-settings-row {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 10px 14px; background: var(--s2);
+  border-radius: var(--radius-sm); margin-bottom: 6px;
+  border: 1px solid var(--border); transition: border-color 0.2s;
+}
+.vitamin-settings-row:hover { border-color: var(--border2); }
+.vitamin-settings-left { display: flex; flex-direction: column; gap: 2px; }
+.vitamin-settings-name { font-size: 0.84rem; font-weight: 600; }
+.vitamin-settings-schedule {
+  font-size: 0.62rem; font-family: 'JetBrains Mono', monospace;
+  color: var(--muted2); text-transform: uppercase; letter-spacing: 1px;
+}
+.vitamin-delete-btn {
+  background: transparent; border: 1px solid var(--border2);
+  color: var(--muted); border-radius: 6px; padding: 4px 10px;
+  font-size: 0.7rem; font-weight: 700; cursor: pointer;
+  font-family: 'Syne', sans-serif; transition: all 0.2s;
+  text-transform: uppercase; letter-spacing: 0.5px;
+}
+.vitamin-delete-btn:hover { border-color: var(--orange); color: var(--orange); }
+
+.schedule-row {
+  display: grid; grid-template-columns: 80px 1fr 1fr;
+  gap: 8px; align-items: center;
+  padding: 8px 0; border-bottom: 1px solid var(--border);
+}
+.schedule-row:last-child { border-bottom: none; }
+.schedule-day-label {
+  font-size: 0.72rem; font-weight: 700; color: var(--muted2);
+  text-transform: uppercase; letter-spacing: 1px;
+}
+.schedule-select {
+  width: 100%; padding: 7px 10px;
+  background: var(--s2); border: 1px solid var(--border2);
+  border-radius: var(--radius-sm); color: var(--text);
+  font-family: 'Syne', sans-serif; font-size: 0.78rem; outline: none;
+  transition: border-color 0.2s;
+}
+.schedule-select:focus { border-color: var(--lime); }
+.schedule-focus-input {
+  width: 100%; padding: 7px 10px;
+  background: var(--s2); border: 1px solid var(--border2);
+  border-radius: var(--radius-sm); color: var(--text);
+  font-family: 'Syne', sans-serif; font-size: 0.78rem; outline: none;
+  transition: border-color 0.2s;
+}
+.schedule-focus-input:focus { border-color: var(--lime); }
+.schedule-save-btn {
+  background: var(--lime-dim); color: var(--lime);
+  border: 1px solid rgba(200,255,87,0.3);
+  border-radius: 6px; padding: 4px 12px;
+  font-size: 0.7rem; font-weight: 700; cursor: pointer;
+  font-family: 'Syne', sans-serif; transition: all 0.2s;
+  text-transform: uppercase; letter-spacing: 0.5px; white-space: nowrap;
+}
+.schedule-save-btn:hover { background: rgba(200,255,87,0.2); }
+
+/* ─── HEATMAP DATE NUMBERS ────────────────────────── */
+.heatmap-cell-inner {
+    width: 100%; height: 100%;
+    display: flex; align-items: flex-start;
+    justify-content: flex-end;
+    padding: 2px 3px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.42rem;
+    color: rgba(255,255,255,0.5);
+    line-height: 1;
+    border-radius: 4px;
+}
+.heatmap-cell.peloton .heatmap-cell-inner,
+.heatmap-cell.gym_monster .heatmap-cell-inner,
+.heatmap-cell.walking .heatmap-cell-inner,
+.heatmap-cell.both .heatmap-cell-inner {
+    color: rgba(255,255,255,0.7);
+}
+  
 </style>
 </head>
 <body>
@@ -656,6 +732,7 @@ svg.ring-svg { transform: rotate(-90deg); }
     <div class="nav-tab active" onclick="switchTab('today')">Today</div>
     <div class="nav-tab" onclick="switchTab('dashboard')">Dashboard</div>
     <div class="nav-tab" onclick="switchTab('history')">History</div>
+    <div class="nav-tab" onclick="switchTab('settings')">Settings</div>
   </div>
   <div class="nav-right">
     <span class="nav-user-name" id="nav-username"></span>
@@ -741,7 +818,16 @@ svg.ring-svg { transform: rotate(-90deg); }
   <div class="page">
     <div class="dash-grid">
 
-      <!-- Weight stat -->
+      <!-- Row 1: This Week / Leaderboard — full width -->
+      <div class="card" style="grid-column:1/-1">
+        <div class="card-accent-bar" style="background:var(--orange)"></div>
+        <div class="vs-title">⚡ THIS WEEK</div>
+        <div id="leaderboard-content">
+          <div class="empty-state" style="padding:12px">Loading...</div>
+        </div>
+      </div>
+
+      <!-- Row 2: Stat cards -->
       <div class="card">
         <div class="card-accent-bar" style="background:var(--blue)"></div>
         <div class="card-label">Current Weight</div>
@@ -750,7 +836,6 @@ svg.ring-svg { transform: rotate(-90deg); }
         <div class="stat-delta" id="stat-weight-delta" style="display:none"></div>
       </div>
 
-      <!-- Streak stat -->
       <div class="card">
         <div class="card-accent-bar" style="background:var(--lime)"></div>
         <div class="card-label">Active Streak</div>
@@ -758,7 +843,6 @@ svg.ring-svg { transform: rotate(-90deg); }
         <div class="stat-sub">days consecutive</div>
       </div>
 
-      <!-- Points stat -->
       <div class="card">
         <div class="card-accent-bar" style="background:var(--orange)"></div>
         <div class="card-label">Week Points</div>
@@ -767,37 +851,21 @@ svg.ring-svg { transform: rotate(-90deg); }
         <div class="stat-delta delta-neut" id="stat-points-delta"></div>
       </div>
 
-      <!-- Side panel -->
-      <div class="side-panel">
-
-        <!-- Leaderboard -->
-        <div class="card">
-          <div class="vs-title">⚡ THIS WEEK</div>
-          <div id="leaderboard-content">
-            <div class="empty-state" style="padding:12px">Loading...</div>
-          </div>
-        </div>
-
-        <!-- Weekly rings -->
-        <div class="card">
-          <div class="card-label">Weekly Goals</div>
-          <div class="rings-row" id="rings-row">
-            <!-- populated by JS -->
-          </div>
-        </div>
-
-        <!-- Badges -->
-        <div class="card">
-          <div class="card-label">Achievements</div>
-          <div class="badges-grid" id="badges-grid">
-            <!-- populated by JS -->
-          </div>
-        </div>
-
+      <!-- Row 3: Weekly Goals + Achievements -->
+      <div class="card" style="grid-column:1/3">
+        <div class="card-accent-bar" style="background:var(--lime)"></div>
+        <div class="card-label">Weekly Goals</div>
+        <div class="rings-row" id="rings-row"></div>
       </div>
 
-      <!-- Heatmap -->
-      <div class="card heatmap-card">
+      <div class="card" style="grid-column:3/-1">
+        <div class="card-accent-bar" style="background:var(--pink)"></div>
+        <div class="card-label">Achievements</div>
+        <div class="badges-grid" id="badges-grid"></div>
+      </div>
+
+      <!-- Row 4: Heatmap — full width -->
+      <div class="card" style="grid-column:1/-1">
         <div class="heatmap-header">
           <div class="card-label" style="margin:0">Activity — Last 60 Days</div>
           <div class="streak-badge">
@@ -825,8 +893,8 @@ svg.ring-svg { transform: rotate(-90deg); }
         </div>
       </div>
 
-      <!-- Recent Workouts -->
-      <div class="card workouts-card">
+      <!-- Row 5: Recent Workouts — full width -->
+      <div class="card" style="grid-column:1/-1">
         <div class="card-label">Recent Workouts</div>
         <table class="workout-table">
           <thead>
@@ -835,19 +903,22 @@ svg.ring-svg { transform: rotate(-90deg); }
               <th>Equipment</th>
               <th>Focus</th>
               <th>Duration</th>
+              <th>Calories</th>
+              <th>Avg HR</th>
               <th>Intensity</th>
               <th>Pts</th>
               <th>Source</th>
             </tr>
           </thead>
           <tbody id="workouts-tbody">
-            <tr><td colspan="7" class="empty-state">Loading...</td></tr>
+            <tr><td colspan="9" class="empty-state">Loading...</td></tr>
           </tbody>
         </table>
       </div>
 
-      <!-- Weight chart -->
-      <div class="card weight-chart-card">
+      <!-- Row 6: Weight Trend + Recovery side by side -->
+      <div class="card" style="grid-column:1/4">
+        <div class="card-accent-bar" style="background:var(--blue)"></div>
         <div class="card-label">Weight Trend</div>
         <div class="mini-chart-wrap" id="weight-chart-wrap">
           <div class="chart-empty">No data yet</div>
@@ -855,8 +926,7 @@ svg.ring-svg { transform: rotate(-90deg); }
         <div class="weight-entries" id="weight-entries"></div>
       </div>
 
-      <!-- Recovery -->
-      <div class="card">
+      <div class="card" style="grid-column:4/-1">
         <div class="card-accent-bar" style="background:var(--pink)"></div>
         <div class="card-label">Recovery</div>
         <div class="recovery-arc" id="recovery-arc">
@@ -864,6 +934,29 @@ svg.ring-svg { transform: rotate(-90deg); }
         </div>
       </div>
 
+      <!-- Row 7: Body Composition — full width -->
+      <div class="card" style="grid-column:1/-1">
+        <div class="card-accent-bar" style="background:var(--blue)"></div>
+        <div class="card-label">Body Composition — Last 7 Days</div>
+        <div style="overflow-x:auto;margin-top:8px">
+          <table class="workout-table" id="body-comp-table">
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th style="color:var(--blue)">Weight</th>
+                <th style="color:var(--orange)">Body Fat %</th>
+                <th style="color:var(--blue)">Muscle Mass</th>
+                <th style="color:var(--orange)">Fat Mass</th>
+                <th style="color:var(--lime)">Fat Free</th>
+                <th style="color:var(--muted2)">Bone Mass</th>
+              </tr>
+            </thead>
+            <tbody id="body-comp-tbody">
+              <tr><td colspan="7" class="empty-state">Loading...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
     </div>
   </div>
 </div>
@@ -896,6 +989,69 @@ svg.ring-svg { transform: rotate(-90deg); }
     </div>
   </div>
 </div>
+
+<!-- ═══ SETTINGS TAB ═══════════════════════════════ -->
+<div class="tab-panel" id="tab-settings" style="display:none">
+  <div class="page">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+      
+      <!-- ── SYNC CONTROLS ──────────────────────────────── -->
+    <div class="card" style="grid-column:1/-1">
+      <div class="card-accent-bar" style="background:var(--lime)"></div>
+      <div class="card-label">Manual Sync</div>
+      <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:center">
+        <button class="complete-btn" onclick="syncPeloton()" id="peloton-sync-btn">
+          🚴 Sync Peloton Now
+        </button>
+        <button class="complete-btn"
+          style="background:var(--orange);box-shadow:0 4px 20px rgba(255,112,67,0.3)"
+          onclick="syncStrava()" id="strava-sync-btn">
+          🏋 Sync Gym Monster Now
+        </button>
+        <span id="peloton-sync-status" style="font-family:'JetBrains Mono',monospace;
+          font-size:0.75rem;color:var(--muted2)"></span>
+        <span id="strava-sync-status" style="font-family:'JetBrains Mono',monospace;
+          font-size:0.75rem;color:var(--muted2)"></span>
+      </div>
+    </div>
+      
+      <!-- ── VITAMINS ────────────────────────────── -->
+      <div class="card">
+        <div class="card-accent-bar" style="background:var(--pink)"></div>
+        <div class="card-label">Vitamin Configuration</div>
+
+        <!-- Add form -->
+        <div style="display:flex;gap:8px;margin-bottom:16px;">
+          <input class="modal-input" type="text" id="vit-name-input"
+            placeholder="Vitamin name e.g. Vitamin D3"
+            style="flex:1;margin:0">
+          <select class="modal-select" id="vit-schedule-input" style="width:120px;margin:0">
+            <option value="morning">Morning</option>
+            <option value="evening">Evening</option>
+            <option value="both">Both</option>
+          </select>
+          <button class="complete-btn" style="padding:10px 18px;font-size:0.85rem"
+            onclick="addVitamin()">ADD</button>
+        </div>
+
+        <!-- List -->
+        <div id="settings-vitamin-list">
+          <div class="empty-state">Loading...</div>
+        </div>
+      </div>
+
+      <!-- ── WORKOUT SCHEDULE ─────────────────────── -->
+      <div class="card">
+        <div class="card-accent-bar" style="background:var(--lime)"></div>
+        <div class="card-label">Weekly Workout Schedule</div>
+        <div id="schedule-list">
+          <div class="empty-state">Loading...</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>  
 
 <!-- ═══ WORKOUT MODAL ══════════════════════════════ -->
 <div class="modal-overlay" id="workout-modal">
@@ -1144,6 +1300,7 @@ async function loadDashboard() {
     renderRings();
     renderBadges();
     renderRecovery();
+    renderBodyCompTable();
   } catch(e) {
     console.error('Dashboard load error:', e);
     showToast('Error loading data — check API connection');
@@ -1324,16 +1481,29 @@ function renderLeaderboard() {
       : `${others[0].name} leads by ${Math.abs(diff)} pts. One session closes the gap.`;
   }
 
-  el.innerHTML = html + (note ? `<div class="vs-note">${note}</div>` : '');
+  el.innerHTML = `
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;align-items:end">
+    <div>${html}</div>
+    ${note ? `<div class="vs-note" style="border:none;padding:0;margin:0;text-align:left;font-size:0.72rem">${note}</div>` : ''}
+  </div>`;
 }
 
 function renderRings() {
-  const wk  = dashData?.week;
+  const wk = dashData?.week;
   if (!wk) return;
 
+  // Count walking as cardio
+  const allWorkoutsThisWeek = wk.workouts || [];
+  const cardioCount = allWorkoutsThisWeek.filter(w =>
+    w.equipment === 'peloton' || w.equipment === 'walking'
+  ).length;
+  const strengthCount = allWorkoutsThisWeek.filter(w =>
+    w.equipment === 'gym_monster' || w.equipment === 'both'
+  ).length;
+
   const rings = [
-    { label: `Cardio\n${wk.cardio_sessions}/${wk.cardio_goal}`, pct: Math.min(wk.cardio_sessions / wk.cardio_goal, 1), color: 'var(--peloton)' },
-    { label: `Strength\n${wk.strength_sessions}/${wk.strength_goal}`, pct: Math.min(wk.strength_sessions / wk.strength_goal, 1), color: 'var(--gym)' },
+    { label: `Cardio\n${cardioCount}/${wk.cardio_goal}`, pct: Math.min(cardioCount / wk.cardio_goal, 1), color: 'var(--peloton)' },
+    { label: `Strength\n${strengthCount}/${wk.strength_goal}`, pct: Math.min(strengthCount / wk.strength_goal, 1), color: 'var(--gym)' },
     { label: `Points\n${wk.points}/${wk.points_goal}`, pct: Math.min(wk.points / wk.points_goal, 1), color: 'var(--lime)' },
   ];
 
@@ -1434,13 +1604,11 @@ function renderHeatmap() {
   today.setHours(0,0,0,0);
   const todayStr = dateStr(today);
 
-  // Go back 60 days, align to Sunday
   const start = new Date(today);
   start.setDate(start.getDate() - 59);
-  // Pad to Sunday
   while (start.getDay() !== 0) start.setDate(start.getDate() - 1);
 
-  const grid    = document.getElementById('heatmap-grid');
+  const grid = document.getElementById('heatmap-grid');
   grid.innerHTML = '';
 
   let d = new Date(start);
@@ -1449,29 +1617,37 @@ function renderHeatmap() {
     week.className = 'heatmap-week';
 
     for (let i = 0; i < 7; i++) {
-      const cell = document.createElement('div');
-      const ds   = dateStr(d);
+      const cell   = document.createElement('div');
+      const ds     = dateStr(d);
+      const dayNum = d.getDate();
 
       if (d > today) {
         cell.className = 'heatmap-cell empty';
       } else if (d < new Date(today.getTime() - 59 * 86400000)) {
         cell.className = 'heatmap-cell empty';
       } else {
-        const eq = lookup[ds];
-        let cls = 'heatmap-cell';
+        const eq  = lookup[ds];
+        let   cls = 'heatmap-cell';
+
         if (eq) {
           if (eq.includes('peloton') && eq.includes('gym_monster')) cls += ' both';
-          else if (eq.includes('peloton')) cls += ' peloton';
+          else if (eq.includes('peloton'))     cls += ' peloton';
           else if (eq.includes('gym_monster')) cls += ' gym_monster';
-          else if (eq.includes('walking')) cls += ' walking'; 
+          else if (eq.includes('walking'))     cls += ' walking';
         }
+
         if (ds === todayStr) cls += ' today';
         cell.className = cls;
-        cell.title = ds + (eq ? ` · ${eq.replace(',', ' + ')}` : ' · Rest');
+        cell.title     = ds + (eq ? ` · ${eq.replace(',', ' + ')}` : ' · Rest');
+
+        // Date number in corner of cell
+        cell.innerHTML = `<div class="heatmap-cell-inner">${dayNum}</div>`;
       }
+
       week.appendChild(cell);
       d.setDate(d.getDate() + 1);
     }
+
     grid.appendChild(week);
     if (d > today && d.getDay() === 0) break;
   }
@@ -1585,6 +1761,66 @@ function renderWeightChart() {
   }).join('');
 }
 
+async function renderBodyCompTable() {
+    const tbody = document.getElementById('body-comp-tbody');
+    try {
+        const entries = await api(`/weight/history/week/${userId}`);
+        if (!entries || !entries.length) {
+            tbody.innerHTML = '<tr><td colspan="7" class="empty-state">No data this week — step on the scale</td></tr>';
+            return;
+        }
+
+        const hasComp = entries.some(e =>
+            e.muscle_mass_lbs || e.fat_ratio_pct || e.fat_mass_lbs
+        );
+        if (!hasComp) {
+            tbody.innerHTML = '<tr><td colspan="7" class="empty-state">No body composition data yet</td></tr>';
+            return;
+        }
+
+        tbody.innerHTML = entries.map(e => {
+            const auto = e.source === 'auto'
+                ? '<span class="auto-pill">AUTO</span>' : '';
+
+            const fmt = (val, decimals = 1, unit = 'lbs') =>
+                val !== null && val !== undefined
+                    ? `${parseFloat(val).toFixed(decimals)} ${unit}`
+                    : '<span style="color:var(--muted)">—</span>';
+
+            return `<tr>
+                <td class="workout-date">
+                    ${fmtDate(e.logged_at)}${auto}
+                </td>
+                <td class="workout-focus">
+                    ${fmt(e.weight_lbs)}
+                </td>
+                <td style="color:var(--orange);font-family:'JetBrains Mono',monospace;font-size:0.72rem">
+                    ${e.fat_ratio_pct !== null && e.fat_ratio_pct !== undefined
+                        ? parseFloat(e.fat_ratio_pct).toFixed(1) + '%'
+                        : '<span style="color:var(--muted)">—</span>'}
+                </td>
+                <td style="color:var(--blue);font-family:'JetBrains Mono',monospace;font-size:0.72rem">
+                    ${fmt(e.muscle_mass_lbs)}
+                </td>
+                <td style="font-family:'JetBrains Mono',monospace;font-size:0.72rem">
+                    ${fmt(e.fat_mass_lbs)}
+                </td>
+                <td style="color:var(--lime);font-family:'JetBrains Mono',monospace;font-size:0.72rem">
+                    ${fmt(e.fat_free_mass_lbs)}
+                </td>
+                <td style="color:var(--muted2);font-family:'JetBrains Mono',monospace;font-size:0.72rem">
+                    ${fmt(e.bone_mass_lbs)}
+                </td>
+            </tr>`;
+        }).join('');
+
+    } catch(e) {
+        tbody.innerHTML = '<tr><td colspan="7" class="empty-state">Error loading data</td></tr>';
+        console.error('Body comp table error:', e);
+    }
+}
+  
+
 // ─────────────────────────────────────────────────────
 // HISTORY TAB
 // ─────────────────────────────────────────────────────
@@ -1615,7 +1851,7 @@ function renderHistoryTable(workouts) {
     ).join('');
     const eqTag = w.equipment === 'peloton'
       ? `<span class="eq-tag eq-peloton">🚴 Peloton</span>`
-      : w.equipement == 'walking'
+      : w.equipment == 'walking'
       ? `<span class="eq-tag" style="background:rgba(80,200,120,0.12);color:#50c878;border:1px solid rgba(80,200,120,0.3)">🚶 Walking</span>`
       : `<span class="eq-tag eq-gym">🏋 Gym Monster</span>`;
     const src = w.source !== 'manual'
@@ -1642,6 +1878,212 @@ function filterHistory(filter, btn) {
   renderHistoryTable(allWorkouts);
 }
 
+
+// ─────────────────────────────────────────────────────
+// SETTINGS TAB
+// ─────────────────────────────────────────────────────
+
+async function loadSettings() {
+    await Promise.all([
+        loadVitaminSettings(),
+        loadScheduleSettings()
+    ]);
+}
+  
+// ── Sync Button Peloton ──────────────────────────────────────────
+async function syncPeloton() {
+    const btn    = document.getElementById('peloton-sync-btn');
+    const status = document.getElementById('peloton-sync-status');
+    btn.disabled = true;
+    btn.textContent = '⏳ Syncing...';
+    status.textContent = '';
+    try {
+        await api('/admin/sync-peloton', 'POST');
+        status.textContent = 'Sync started — check back in 30 seconds';
+        status.style.color = 'var(--lime)';
+        showToast('Peloton sync started');
+        setTimeout(async () => {
+            await loadDashboard();
+            status.textContent = 'Sync complete';
+            btn.disabled = false;
+            btn.textContent = '🚴 Sync Peloton Now';
+        }, 30000);
+    } catch(e) {
+        status.textContent = 'Sync failed';
+        status.style.color = 'var(--orange)';
+        btn.disabled = false;
+        btn.textContent = '🚴 Sync Peloton Now';
+        showToast('Sync failed');
+    }
+}
+// ── Sync Button Stravia ──────────────────────────────────────────
+async function syncStrava() {
+    const btn    = document.getElementById('strava-sync-btn');
+    const status = document.getElementById('strava-sync-status');
+    btn.disabled = true;
+    btn.textContent = '⏳ Syncing...';
+    status.textContent = '';
+    try {
+        await api('/admin/sync-strava', 'POST');
+        status.textContent = 'Sync started — check back in 30 seconds';
+        status.style.color = 'var(--lime)';
+        showToast('Gym Monster sync started');
+        setTimeout(async () => {
+            await loadDashboard();
+            status.textContent = 'Sync complete';
+            btn.disabled = false;
+            btn.textContent = '🏋 Sync Gym Monster Now';
+        }, 30000);
+    } catch(e) {
+        status.textContent = 'Sync failed';
+        status.style.color = 'var(--orange)';
+        btn.disabled = false;
+        btn.textContent = '🏋 Sync Gym Monster Now';
+        showToast('Sync failed');
+    }
+}  
+  
+// ── VITAMINS ──────────────────────────────────────────
+
+async function loadVitaminSettings() {
+    const el = document.getElementById('settings-vitamin-list');
+    try {
+        const vitamins = await api(`/vitamins/config/${userId}`);
+        renderVitaminSettings(vitamins || []);
+    } catch(e) {
+        el.innerHTML = '<div class="empty-state">Error loading vitamins</div>';
+    }
+}
+
+function renderVitaminSettings(vitamins) {
+    const el = document.getElementById('settings-vitamin-list');
+    if (!vitamins.length) {
+        el.innerHTML = '<div class="empty-state">No vitamins added yet</div>';
+        return;
+    }
+    el.innerHTML = vitamins.map(v => `
+        <div class="vitamin-settings-row">
+            <div class="vitamin-settings-left">
+                <div class="vitamin-settings-name">${v.vitamin_name}</div>
+                <div class="vitamin-settings-schedule">${v.schedule}</div>
+            </div>
+            <button class="vitamin-delete-btn"
+                onclick="deleteVitamin(${v.id}, '${v.vitamin_name}')">
+                Remove
+            </button>
+        </div>
+    `).join('');
+}
+
+async function addVitamin() {
+    const name     = document.getElementById('vit-name-input').value.trim();
+    const schedule = document.getElementById('vit-schedule-input').value;
+    if (!name) { showToast('Enter a vitamin name first'); return; }
+
+    try {
+        await api('/vitamins/config', 'POST', {
+            vitamin_name: name,
+            schedule: schedule
+        });
+        document.getElementById('vit-name-input').value = '';
+        showToast(`✓ ${name} added`);
+        await loadVitaminSettings();
+        // Also refresh today's vitamin list if on Today tab
+        const vitamins = await api(`/vitamins/today/${userId}`);
+        renderVitamins(vitamins || []);
+    } catch(e) {
+        showToast('Error adding vitamin');
+    }
+}
+
+async function deleteVitamin(id, name) {
+    // Soft delete — sets active = false rather than deleting the row
+    // This preserves historical log data
+    try {
+        await api(`/vitamins/config/${id}`, 'DELETE');
+        showToast(`${name} removed`);
+        await loadVitaminSettings();
+        const vitamins = await api(`/vitamins/today/${userId}`);
+        renderVitamins(vitamins || []);
+    } catch(e) {
+        showToast('Error removing vitamin');
+    }
+}
+
+// ── WORKOUT SCHEDULE ──────────────────────────────────
+
+const DAY_NAMES = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+
+async function loadScheduleSettings() {
+    const el = document.getElementById('schedule-list');
+    try {
+        const schedule = await api(`/schedule/${userId}`);
+        renderScheduleSettings(schedule || []);
+    } catch(e) {
+        el.innerHTML = '<div class="empty-state">Error loading schedule</div>';
+    }
+}
+
+function renderScheduleSettings(schedule) {
+    const el = document.getElementById('schedule-list');
+
+    // Build a lookup by day_of_week
+    const byDay = {};
+    schedule.forEach(s => byDay[s.day_of_week] = s);
+
+    el.innerHTML = `
+        <div style="display:grid;grid-template-columns:80px 1fr 1fr auto;
+                    gap:8px;padding-bottom:8px;border-bottom:1px solid var(--border);
+                    margin-bottom:4px;">
+            <span class="card-label" style="margin:0">Day</span>
+            <span class="card-label" style="margin:0">Equipment</span>
+            <span class="card-label" style="margin:0">Focus Area</span>
+            <span></span>
+        </div>
+        ${DAY_NAMES.map((day, i) => {
+            const entry = byDay[i] || {};
+            return `
+                <div class="schedule-row" style="grid-template-columns:80px 1fr 1fr auto">
+                    <span class="schedule-day-label">${day.substring(0,3)}</span>
+                    <select class="schedule-select" id="sched-eq-${i}">
+                        <option value="rest"        ${entry.equipment === 'rest'        ? 'selected' : ''}>Rest</option>
+                        <option value="peloton"     ${entry.equipment === 'peloton'     ? 'selected' : ''}>🚴 Peloton</option>
+                        <option value="gym_monster" ${entry.equipment === 'gym_monster' ? 'selected' : ''}>🏋 Gym Monster</option>
+                        <option value="walking"     ${entry.equipment === 'walking'     ? 'selected' : ''}>🚶 Walking</option>
+                        <option value="both"        ${entry.equipment === 'both'        ? 'selected' : ''}>Both</option>
+                    </select>
+                    <input class="schedule-focus-input" type="text"
+                        id="sched-focus-${i}"
+                        value="${entry.focus_area || ''}"
+                        placeholder="e.g. Upper Body">
+                    <button class="schedule-save-btn" onclick="saveScheduleDay(${i})">Save</button>
+                </div>
+            `;
+        }).join('')}
+    `;
+}
+
+async function saveScheduleDay(dayOfWeek) {
+    const equipment  = document.getElementById(`sched-eq-${dayOfWeek}`).value;
+    const focus_area = document.getElementById(`sched-focus-${dayOfWeek}`).value.trim();
+
+    try {
+        await api(`/schedule/${userId}`, 'PUT', {
+            day_of_week: dayOfWeek,
+            equipment:   equipment,
+            focus_area:  focus_area || null,
+            notes:       null
+        });
+        showToast(`${DAY_NAMES[dayOfWeek]} saved`);
+        // Refresh today's schedule card if it's showing today's day
+        if (dashData) {
+            dashData.todays_schedule = { equipment, focus_area };
+            renderTodayDynamic();
+        }
+    } catch(e) {
+        showToast('Error saving schedule');
+    }
+}
 // ─────────────────────────────────────────────────────
 // ACTIONS — WATER
 // ─────────────────────────────────────────────────────
@@ -1802,6 +2244,7 @@ function switchTab(tab) {
 
   // Load history on demand
   if (tab === 'history') loadHistory();
+  if (tab === 'settings') loadSettings();
 }
 
 // ─────────────────────────────────────────────────────
