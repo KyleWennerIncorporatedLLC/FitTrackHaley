@@ -1317,11 +1317,12 @@ function renderWorkoutRows(tbodyId, workouts) {
   tbody.innerHTML = workouts.map(w => {
     const dots = [1,2,3,4,5].map(i => `<div class="intensity-dot ${i <= (w.intensity||0) ? 'filled' : ''}"></div>`).join('');
     const isPilates = w.focus_area?.toLowerCase().includes('pilates');
+    const isPeloton = w.equipment === 'peloton' || w.source?.toLowerCase().includes('peloton');
     const eqTag = isPilates
-      ? w.equipment === 'peloton'
+      ? isPeloton
         ? `<span class="eq-tag eq-peloton">🧘 Peloton Pilates</span>`
         : `<span class="eq-tag eq-gym">🧘 GM Pilates</span>`
-      : w.equipment === 'peloton'
+      : isPeloton
       ? `<span class="eq-tag eq-peloton">🚴 Peloton</span>`
       : w.equipment === 'walking'
       ? `<span class="eq-tag" style="background:rgba(80,200,120,0.12);color:#50c878;border:1px solid rgba(80,200,120,0.3)">🚶 Walking</span>`
@@ -1419,11 +1420,12 @@ function renderHistoryTable(workouts) {
   tbody.innerHTML = filtered.map(w => {
     const dots = [1,2,3,4,5].map(i => `<div class="intensity-dot ${i <= (w.intensity||0) ? 'filled' : ''}"></div>`).join('');
     const isPilates = w.focus_area?.toLowerCase().includes('pilates');
+    const isPeloton = w.equipment === 'peloton' || w.source?.toLowerCase().includes('peloton');
     const eqTag = isPilates
-      ? w.equipment === 'peloton'
+      ? isPeloton
         ? `<span class="eq-tag eq-peloton">🧘 Peloton Pilates</span>`
         : `<span class="eq-tag eq-gym">🧘 GM Pilates</span>`
-      : w.equipment === 'peloton'
+      : isPeloton
       ? `<span class="eq-tag eq-peloton">🚴 Peloton</span>`
       : w.equipment === 'walking'
       ? `<span class="eq-tag" style="background:rgba(80,200,120,0.12);color:#50c878;border:1px solid rgba(80,200,120,0.3)">🚶 Walking</span>`
