@@ -25,7 +25,7 @@
   --orange-dim:rgba(255,112,67,0.12);
   --pink:      #ff4fa3;
   --pink-dim:  rgba(255,79,163,0.12);
-  --red:	   #ff0000;
+  --red:	     #ff0000;
   --red-dim:   rgba(170,0,0,0.12);
   --text:      #dde3f0;
   --muted:     #4a5570;
@@ -667,6 +667,7 @@ svg.ring-svg { transform: rotate(-90deg); }
       <button class="filter-btn" onclick="filterHistory('peloton', this)">Peloton</button>
       <button class="filter-btn" onclick="filterHistory('gym_monster', this)">Gym Monster</button>
       <button class="filter-btn" onclick="filterHistory('walking', this)">Walking</button>
+      <button class="filter-btn" onclick="filterHistory('pilates', this)">Pilates</button>
     </div>
     <div class="history-grid">
       <div class="card" style="grid-column:1/-1">
@@ -834,6 +835,11 @@ const RECOVERY_HOURS = {
   trap: 48, lat: 72, lower_back: 72,
   abs: 24, oblique: 24,
   glute: 72, quad: 72, hamstring: 72, calf: 48,
+};
+
+// Pilates is low-impact / mobility-focused — muscles need far less recovery than strength work
+const PILATES_RECOVERY_HOURS = {
+  lower_back: 24, abs: 24, oblique: 24, glute: 24, quad: 24,
 };
 
 const MUSCLE_ELEMENTS = {
@@ -1032,13 +1038,22 @@ function detectMuscles(focusArea) {
 
 function renderMuscleMap() {
   const gymWorkouts = dashData?.recent_gym_workouts || [];
-  const muscleLastWorked = {};
-  for (const workout of gymWorkouts) {
+  const allRecentWorkouts = dashData?.recent_workouts || [];
+  // Include pilates from Peloton (recent_workouts) that aren't already in gym_workouts
+  const gymIds = new Set(gymWorkouts.map(w => w.id));
+  const pelotonPilates = allRecentWorkouts.filter(w =>
+    w.focus_area?.toLowerCase().includes('pilates') && !gymIds.has(w.id)
+  );
+  const muscleSourceWorkouts = [...gymWorkouts, ...pelotonPilates];
+
+  const muscleLastWorkedData = {}; // muscle -> { workedAt, isPilates }
+  for (const workout of muscleSourceWorkouts) {
     const muscles = detectMuscles(workout.focus_area);
     const workedAt = new Date(workout.logged_at);
+    const isPilates = workout.focus_area?.toLowerCase().includes('pilates');
     for (const muscle of muscles) {
-      if (!muscleLastWorked[muscle] || workedAt > muscleLastWorked[muscle]) {
-        muscleLastWorked[muscle] = workedAt;
+      if (!muscleLastWorkedData[muscle] || workedAt > muscleLastWorkedData[muscle].workedAt) {
+        muscleLastWorkedData[muscle] = { workedAt, isPilates };
       }
     }
   }
@@ -1052,9 +1067,12 @@ function renderMuscleMap() {
     }
   }
   // Apply colors
-  for (const [muscle, lastWorked] of Object.entries(muscleLastWorked)) {
+  for (const [muscle, data] of Object.entries(muscleLastWorkedData)) {
+    const lastWorked = data.workedAt;
     const hoursAgo = (now - lastWorked) / 3600000;
-    const recoveryHours = RECOVERY_HOURS[muscle] || 48;
+    const recoveryHours = data.isPilates
+      ? (PILATES_RECOVERY_HOURS[muscle] || 24)
+      : (RECOVERY_HOURS[muscle] || 48);
     const color = getRecoveryColor(hoursAgo, recoveryHours);
     const pct = Math.min(hoursAgo / recoveryHours, 1);
     for (const id of (MUSCLE_ELEMENTS[muscle] || [])) {
@@ -1298,7 +1316,12 @@ function renderWorkoutRows(tbodyId, workouts) {
   if (!workouts.length) { tbody.innerHTML = `<tr><td colspan="9" class="empty-state">No workouts logged yet</td></tr>`; return; }
   tbody.innerHTML = workouts.map(w => {
     const dots = [1,2,3,4,5].map(i => `<div class="intensity-dot ${i <= (w.intensity||0) ? 'filled' : ''}"></div>`).join('');
-    const eqTag = w.equipment === 'peloton'
+    const isPilates = w.focus_area?.toLowerCase().includes('pilates');
+    const eqTag = isPilates
+      ? w.equipment === 'peloton'
+        ? `<span class="eq-tag eq-peloton">🧘 Peloton Pilates</span>`
+        : `<span class="eq-tag eq-gym">🧘 GM Pilates</span>`
+      : w.equipment === 'peloton'
       ? `<span class="eq-tag eq-peloton">🚴 Peloton</span>`
       : w.equipment === 'walking'
       ? `<span class="eq-tag" style="background:rgba(80,200,120,0.12);color:#50c878;border:1px solid rgba(80,200,120,0.3)">🚶 Walking</span>`
@@ -1388,12 +1411,19 @@ async function loadHistory() {
 }
 
 function renderHistoryTable(workouts) {
-  const filtered = currentFilter === 'all' ? workouts : workouts.filter(w => w.equipment === currentFilter);
+  const filtered = currentFilter === 'all' ? workouts
+    : currentFilter === 'pilates' ? workouts.filter(w => w.focus_area?.toLowerCase().includes('pilates'))
+    : workouts.filter(w => w.equipment === currentFilter);
   const tbody = document.getElementById('history-tbody');
   if (!filtered.length) { tbody.innerHTML = `<tr><td colspan="9" class="empty-state">No workouts found</td></tr>`; return; }
   tbody.innerHTML = filtered.map(w => {
     const dots = [1,2,3,4,5].map(i => `<div class="intensity-dot ${i <= (w.intensity||0) ? 'filled' : ''}"></div>`).join('');
-    const eqTag = w.equipment === 'peloton'
+    const isPilates = w.focus_area?.toLowerCase().includes('pilates');
+    const eqTag = isPilates
+      ? w.equipment === 'peloton'
+        ? `<span class="eq-tag eq-peloton">🧘 Peloton Pilates</span>`
+        : `<span class="eq-tag eq-gym">🧘 GM Pilates</span>`
+      : w.equipment === 'peloton'
       ? `<span class="eq-tag eq-peloton">🚴 Peloton</span>`
       : w.equipment === 'walking'
       ? `<span class="eq-tag" style="background:rgba(80,200,120,0.12);color:#50c878;border:1px solid rgba(80,200,120,0.3)">🚶 Walking</span>`
