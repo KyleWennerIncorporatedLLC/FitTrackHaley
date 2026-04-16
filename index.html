@@ -1706,23 +1706,17 @@ setInterval(() => { if (token && userId) loadDashboard(); }, 5 * 60 * 1000);
 const PILATES_ICS  = 'https://api-maria.cobrakyle69.com/proxy/pilates-ics';
 const CORS_PROXY   = '';
 let pilatesEvents  = [];
+
+
 	
 async function fetchPilatesClasses() {
   const wrap = document.getElementById('pilates-classes-wrap');
   if (!wrap) return;
   try {
     let text;
-    // Try direct fetch first; Google Calendar public ICS allows CORS on some configurations
-    try {
-      const r = await fetch(PILATES_ICS);
-      if (!r.ok) throw new Error(r.status);
-      text = await r.text();
-    } catch {
-      // Fall back through a CORS proxy
-      const r2 = await fetch(CORS_PROXY + encodeURIComponent(PILATES_ICS));
-      if (!r2.ok) throw new Error(r2.status);
-      text = await r2.text();
-    }
+    const r = await fetch(PILATES_ICS);
+    if (!r.ok) throw new Error(r.status);
+    text = await r.text();
     pilatesEvents = parseICS(text);
     renderPilatesClasses();
   } catch(e) {
