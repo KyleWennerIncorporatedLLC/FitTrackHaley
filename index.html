@@ -743,7 +743,8 @@ svg.ring-svg { transform: rotate(-90deg); }
         <option value="peloton">🚴 Peloton</option>
         <option value="gym_monster">🏋 Gym Monster</option>
         <option value="walking">🚶 Walking</option>
-        <option value="both">Both</option>
+        <option value="both">🚴+🏋 Both</option>
+        <option value="mixed">🚴+🧘 Mixed (Peloton + Pilates)</option>
       </select>
     </div>
     <div class="modal-field">
@@ -998,12 +999,15 @@ function renderTodayDynamic() {
   const titleEl = document.getElementById('today-schedule-title');
   const metaEl = document.getElementById('today-schedule-meta');
   if (sched && sched.equipment !== 'rest') {
-    titleEl.innerHTML = `<span>${sched.focus_area || sched.equipment.replace('_',' ').toUpperCase()}</span>`;
+    const titleLabel = sched.equipment === 'mixed' ? (sched.focus_area || 'PELOTON + PILATES')
+      : sched.focus_area || sched.equipment.replace('_',' ').toUpperCase();
+    titleEl.innerHTML = `<span>${titleLabel}</span>`;
     let tags = '';
-    if (sched.equipment === 'peloton' || sched.equipment === 'both') tags += `<span class="eq-tag eq-peloton">🚴 Peloton</span>`;
+    if (sched.equipment === 'peloton' || sched.equipment === 'both' || sched.equipment === 'mixed') tags += `<span class="eq-tag eq-peloton">🚴 Peloton</span>`;
     if (sched.equipment === 'gym_monster' || sched.equipment === 'both') tags += `<span class="eq-tag eq-gym">🏋 Gym Monster</span>`;
+    if (sched.equipment === 'mixed') tags += ` <span class="eq-tag" style="background:var(--pink-dim);color:var(--pink);border:1px solid rgba(255,79,163,0.3)">🧘 Club Pilates</span>`;
     metaEl.innerHTML = tags;
-    document.getElementById('wk-equipment').value = sched.equipment === 'both' ? 'peloton' : sched.equipment;
+    document.getElementById('wk-equipment').value = (sched.equipment === 'both' || sched.equipment === 'mixed') ? 'peloton' : sched.equipment;
     if (sched.focus_area) document.getElementById('wk-focus').value = sched.focus_area;
   } else {
     titleEl.innerHTML = 'REST DAY';
@@ -1332,7 +1336,9 @@ function renderWorkoutRows(tbodyId, workouts) {
     const dots = [1,2,3,4,5].map(i => `<div class="intensity-dot ${i <= (w.intensity||0) ? 'filled' : ''}"></div>`).join('');
     const isPilates = w.focus_area?.toLowerCase().includes('pilates');
     const isPeloton = w.equipment === 'peloton' || w.source?.toLowerCase().includes('peloton');
-    const eqTag = w.equipment === 'pilates'
+    const eqTag = w.equipment === 'mixed'
+      ? `<span class="eq-tag eq-peloton">🚴 Peloton</span> <span class="eq-tag" style="background:var(--pink-dim);color:var(--pink);border:1px solid rgba(255,79,163,0.3)">🧘 Club Pilates</span>`
+      : w.equipment === 'pilates'
       ? `<span class="eq-tag" style="background:var(--pink-dim);color:var(--pink);border:1px solid rgba(255,79,163,0.3)">🧘 Club Pilates</span>`
       : isPilates
       ? isPeloton
@@ -1427,13 +1433,37 @@ async function loadHistory() {
   try {
     const data = await api(`/workouts/${userId}?limit=50`);
     allWorkouts = data || [];
+    mergePilatesIntoAllWorkouts();
     renderHistoryTable(allWorkouts);
   } catch(e) { console.error('History load error:', e); }
 }
 
+function mergePilatesIntoAllWorkouts() {
+  if (!pilatesEvents.length) return;
+  const now = new Date();
+  const completed = pilatesEvents.filter(e => {
+    const endTime = e.end || new Date(e.start.getTime() + 3600000);
+    const title = (e.summary || '').toLowerCase();
+    if (title.includes('waitlist') || title.includes('cancelled') || title.includes('pending')) return false;
+    return now >= endTime;
+  });
+  if (!completed.length) return;
+  const calendarWorkouts = completed.map(e => {
+    const endTime = e.end || new Date(e.start.getTime() + 3600000);
+    const durMin = e.end ? Math.round((e.end - e.start) / 60000) : 50;
+    return { logged_at: endTime.toISOString(), equipment: 'pilates', focus_area: e.summary || 'Pilates',
+      duration_mins: durMin, calories: null, avg_heart_rate: null, intensity: 0, points: null, source: 'calendar' };
+  });
+  const existingKeys = new Set(allWorkouts.map(w => `${fmtDate(w.logged_at)}|${(w.focus_area||'').toLowerCase()}`));
+  const newWorkouts = calendarWorkouts.filter(w => !existingKeys.has(`${fmtDate(w.logged_at)}|${(w.focus_area||'').toLowerCase()}`));
+  if (!newWorkouts.length) return;
+  allWorkouts = [...allWorkouts, ...newWorkouts].sort((a, b) => new Date(b.logged_at) - new Date(a.logged_at));
+}
+
 function renderHistoryTable(workouts) {
   const filtered = currentFilter === 'all' ? workouts
-    : currentFilter === 'pilates' ? workouts.filter(w => w.focus_area?.toLowerCase().includes('pilates'))
+    : currentFilter === 'pilates' ? workouts.filter(w => w.focus_area?.toLowerCase().includes('pilates') || w.equipment === 'pilates' || w.equipment === 'mixed')
+    : currentFilter === 'peloton' ? workouts.filter(w => w.equipment === 'peloton' || w.equipment === 'mixed' || w.source?.toLowerCase().includes('peloton'))
     : workouts.filter(w => w.equipment === currentFilter);
   const tbody = document.getElementById('history-tbody');
   if (!filtered.length) { tbody.innerHTML = `<tr><td colspan="9" class="empty-state">No workouts found</td></tr>`; return; }
@@ -1441,7 +1471,11 @@ function renderHistoryTable(workouts) {
     const dots = [1,2,3,4,5].map(i => `<div class="intensity-dot ${i <= (w.intensity||0) ? 'filled' : ''}"></div>`).join('');
     const isPilates = w.focus_area?.toLowerCase().includes('pilates');
     const isPeloton = w.equipment === 'peloton' || w.source?.toLowerCase().includes('peloton');
-    const eqTag = isPilates
+    const eqTag = w.equipment === 'mixed'
+      ? `<span class="eq-tag eq-peloton">🚴 Peloton</span> <span class="eq-tag" style="background:var(--pink-dim);color:var(--pink);border:1px solid rgba(255,79,163,0.3)">🧘 Club Pilates</span>`
+      : w.equipment === 'pilates'
+      ? `<span class="eq-tag" style="background:var(--pink-dim);color:var(--pink);border:1px solid rgba(255,79,163,0.3)">🧘 Club Pilates</span>`
+      : isPilates
       ? isPeloton
         ? `<span class="eq-tag eq-peloton">🧘 Peloton Pilates</span>`
         : `<span class="eq-tag eq-gym">🧘 GM Pilates</span>`
@@ -1450,7 +1484,9 @@ function renderHistoryTable(workouts) {
       : w.equipment === 'walking'
       ? `<span class="eq-tag" style="background:rgba(80,200,120,0.12);color:#50c878;border:1px solid rgba(80,200,120,0.3)">🚶 Walking</span>`
       : `<span class="eq-tag eq-gym">🏋 Gym Monster</span>`;
-    const src = w.source !== 'manual' ? `<span class="source-tag source-auto">${w.source}</span>` : `<span class="source-tag source-manual">manual</span>`;
+    const src = w.source === 'calendar'
+      ? `<span class="source-tag source-calendar">📅 calendar</span>`
+      : w.source !== 'manual' ? `<span class="source-tag source-auto">${w.source}</span>` : `<span class="source-tag source-manual">manual</span>`;
     return `<tr>
       <td class="workout-date">${fmtDate(w.logged_at)}</td><td>${eqTag}</td>
       <td class="workout-focus">${w.focus_area || '—'}</td>
@@ -1565,7 +1601,8 @@ function renderScheduleSettings(schedule) {
           <option value="peloton" ${entry.equipment === 'peloton' ? 'selected' : ''}>🚴 Peloton</option>
           <option value="gym_monster" ${entry.equipment === 'gym_monster' ? 'selected' : ''}>🏋 Gym Monster</option>
           <option value="walking" ${entry.equipment === 'walking' ? 'selected' : ''}>🚶 Walking</option>
-          <option value="both" ${entry.equipment === 'both' ? 'selected' : ''}>Both</option>
+          <option value="both" ${entry.equipment === 'both' ? 'selected' : ''}>🚴+🏋 Both</option>
+          <option value="mixed" ${entry.equipment === 'mixed' ? 'selected' : ''}>🚴+🧘 Mixed (Peloton + Pilates)</option>
         </select>
         <input class="schedule-focus-input" type="text" id="sched-focus-${i}" value="${entry.focus_area || ''}" placeholder="e.g. Upper Body">
         <button class="schedule-save-btn" onclick="saveScheduleDay(${i})">Save</button>
@@ -1855,6 +1892,40 @@ function renderPilatesClasses() {
   // Update the muscle map SVG with any completed classes
   applyPilatesToMuscleMap();
   injectPilatesIntoWorkoutsTable();
+  updateTodayPlanWithPilates();
+}
+
+function updateTodayPlanWithPilates() {
+  if (!pilatesEvents.length) return;
+  const now = new Date();
+  const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const todayEnd = new Date(todayStart); todayEnd.setDate(todayEnd.getDate() + 1);
+
+  const todayClasses = pilatesEvents.filter(e => {
+    const title = (e.summary || '').toLowerCase();
+    if (title.includes('waitlist') || title.includes('cancelled') || title.includes('pending')) return false;
+    return e.start >= todayStart && e.start < todayEnd;
+  });
+  if (!todayClasses.length) return;
+
+  const sched = dashData?.todays_schedule;
+  const titleEl = document.getElementById('today-schedule-title');
+  const metaEl = document.getElementById('today-schedule-meta');
+  if (!titleEl || !metaEl) return;
+
+  // 'mixed' schedule already rendered with Club Pilates tag — nothing to do
+  if (sched?.equipment === 'mixed') return;
+
+  if (!sched || sched.equipment === 'rest') {
+    const classNames = todayClasses.map(e => e.summary).join(' + ');
+    titleEl.innerHTML = `<span>${classNames}</span>`;
+    metaEl.innerHTML = `<span class="eq-tag" style="background:var(--pink-dim);color:var(--pink);border:1px solid rgba(255,79,163,0.3)">🧘 Club Pilates</span>`;
+  } else {
+    // Append pilates tag alongside scheduled workout (e.g. Peloton day that also has a pilates class)
+    if (!metaEl.innerHTML.includes('Club Pilates')) {
+      metaEl.innerHTML += ` <span class="eq-tag" style="background:var(--pink-dim);color:var(--pink);border:1px solid rgba(255,79,163,0.3)">🧘 Club Pilates</span>`;
+    }
+  }
 }
 
 // ─────────────────────────────────────────────────────
@@ -1945,10 +2016,9 @@ function injectPilatesIntoWorkoutsTable() {
   });
 
   // Merge with API workouts, avoiding duplicates by matching date + focus
+  const baseWorkouts = allWorkouts.length ? allWorkouts : (dashData?.recent_workouts || []);
   const existingKeys = new Set(
-    (dashData?.recent_workouts || []).map(w =>
-      `${fmtDate(w.logged_at)}|${(w.focus_area||'').toLowerCase()}`
-    )
+    baseWorkouts.map(w => `${fmtDate(w.logged_at)}|${(w.focus_area||'').toLowerCase()}`)
   );
 
   const newWorkouts = calendarWorkouts.filter(w =>
@@ -1958,12 +2028,12 @@ function injectPilatesIntoWorkoutsTable() {
   if (!newWorkouts.length) return;
 
   // Merge and sort by date descending
-  const merged = [...(dashData?.recent_workouts || []), ...newWorkouts]
+  const merged = [...baseWorkouts, ...newWorkouts]
     .sort((a, b) => new Date(b.logged_at) - new Date(a.logged_at));
 
   allWorkouts = merged;
   renderWorkoutRows('workouts-tbody', merged);
-  renderWorkoutRows('history-tbody', merged);
+  renderHistoryTable(merged);
 }
 		
 // Re-render status (NOW / Done badges) every 60 seconds
