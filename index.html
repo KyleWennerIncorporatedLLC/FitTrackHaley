@@ -1707,7 +1707,6 @@ const PILATES_ICS  = 'https://api-maria.cobrakyle69.com/proxy/pilates-ics';
 const CORS_PROXY   = '';
 let pilatesEvents  = [];
 
-
 	
 async function fetchPilatesClasses() {
   const wrap = document.getElementById('pilates-classes-wrap');
@@ -1720,11 +1719,7 @@ async function fetchPilatesClasses() {
     pilatesEvents = parseICS(text);
     renderPilatesClasses();
   } catch(e) {
-    wrap.innerHTML = `<div class="empty-state" style="text-align:left;line-height:1.8">
-      <span style="color:var(--orange)">⚠ Could not load calendar.</span><br>
-      <span style="color:var(--muted);font-size:0.72rem">Make sure the Google Calendar is set to <b style="color:var(--text)">public</b>:<br>
-      Google Calendar → Settings → [calendar name] → Access permissions → Make available to public.</span>
-    </div>`;
+    wrap.innerHTML = `<div class="empty-state" style="color:var(--orange)">⚠ Error: ${e.message}</div>`;
   }
 }
 
