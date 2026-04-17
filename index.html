@@ -190,9 +190,11 @@ nav { position: sticky; top: 0; z-index: 200; display: flex; align-items: center
 .heatmap-cell.gym_monster { background: rgba(62,184,255,0.7); }
 .heatmap-cell.walking { background: rgba(80,200,120,0.7); }
 .heatmap-cell.both { background: linear-gradient(135deg, rgba(232,50,76,0.8) 50%, rgba(62,184,255,0.8) 50%); }
+.heatmap-cell.pilates { background: rgba(255,79,163,0.7); }
+.heatmap-cell.mixed { background: linear-gradient(135deg, rgba(232,50,76,0.8) 50%, rgba(255,79,163,0.8) 50%); }
 .heatmap-cell.today { outline: 2px solid var(--lime); outline-offset: 1px; }
 .heatmap-cell-inner { width: 100%; height: 100%; display: flex; align-items: flex-start; justify-content: flex-end; padding: 2px 3px; font-family: 'JetBrains Mono', monospace; font-size: 0.42rem; color: rgba(255,255,255,0.5); line-height: 1; border-radius: 4px; }
-.heatmap-cell.peloton .heatmap-cell-inner, .heatmap-cell.gym_monster .heatmap-cell-inner, .heatmap-cell.walking .heatmap-cell-inner, .heatmap-cell.both .heatmap-cell-inner { color: rgba(255,255,255,0.7); }
+.heatmap-cell.peloton .heatmap-cell-inner, .heatmap-cell.gym_monster .heatmap-cell-inner, .heatmap-cell.walking .heatmap-cell-inner, .heatmap-cell.both .heatmap-cell-inner, .heatmap-cell.pilates .heatmap-cell-inner, .heatmap-cell.mixed .heatmap-cell-inner { color: rgba(255,255,255,0.7); }
 .heatmap-legend { display: flex; gap: 16px; margin-top: 12px; flex-wrap: wrap; }
 .legend-item { display: flex; align-items: center; gap: 6px; font-size: 0.68rem; color: var(--muted2); }
 .legend-dot { width: 10px; height: 10px; border-radius: 3px; }
@@ -621,9 +623,11 @@ svg.ring-svg { transform: rotate(-90deg); }
           <div class="legend-item"><div class="legend-dot" style="background:rgba(232,50,76,0.7)"></div>Peloton</div>
           <div class="legend-item"><div class="legend-dot" style="background:rgba(62,184,255,0.7)"></div>Gym Monster</div>
           <div class="legend-item"><div class="legend-dot" style="background:linear-gradient(135deg,rgba(232,50,76,0.8) 50%,rgba(62,184,255,0.8) 50%)"></div>Both</div>
+          <div class="legend-item"><div class="legend-dot" style="background:rgba(255,79,163,0.7)"></div>Club Pilates</div>
+          <div class="legend-item"><div class="legend-dot" style="background:linear-gradient(135deg,rgba(232,50,76,0.8) 50%,rgba(255,79,163,0.8) 50%)"></div>Mixed</div>
+          <div class="legend-item"><div class="legend-dot" style="background:rgba(80,200,120,0.7)"></div>Walking</div>
           <div class="legend-item"><div class="legend-dot" style="background:var(--s2)"></div>Rest</div>
           <div class="legend-item"><div class="legend-dot" style="outline:2px solid var(--lime);outline-offset:1px;background:transparent"></div>Today</div>
-          <div class="legend-item"><div class="legend-dot" style="background:rgba(80,200,120,0.7)"></div>Walking</div>
         </div>
       </div>
 
@@ -964,10 +968,13 @@ async function loadDashboard() {
     dashData = await api(`/dashboard/${userId}`);
     if (!dashData) return;
     renderTodayDynamic();
+    updateTodayPlanWithPilates();
     renderMuscleMap();
     renderDashboard();
     renderHeatmap();
+    updateHeatmapWithPilates();
     renderWorkoutsTable();
+    injectPilatesIntoWorkoutsTable();
     renderWeightChart();
     renderLeaderboard();
     renderRings();
@@ -1309,6 +1316,7 @@ function renderHeatmap() {
         }
         if (ds === todayStr) cls += ' today';
         cell.className = cls;
+        cell.dataset.date = ds;
         cell.title = ds + (eq ? ` · ${eq.replace(',', ' + ')}` : ' · Rest');
         cell.innerHTML = `<div class="heatmap-cell-inner">${dayNum}</div>`;
       }
@@ -1893,6 +1901,7 @@ function renderPilatesClasses() {
   applyPilatesToMuscleMap();
   injectPilatesIntoWorkoutsTable();
   updateTodayPlanWithPilates();
+  updateHeatmapWithPilates();
 }
 
 function updateTodayPlanWithPilates() {
@@ -1926,6 +1935,42 @@ function updateTodayPlanWithPilates() {
       metaEl.innerHTML += ` <span class="eq-tag" style="background:var(--pink-dim);color:var(--pink);border:1px solid rgba(255,79,163,0.3)">🧘 Club Pilates</span>`;
     }
   }
+}
+
+function updateHeatmapWithPilates() {
+  if (!pilatesEvents.length) return;
+  const now = new Date();
+
+  // Build a map: dateStr -> array of class names (for completed non-cancelled events)
+  const pilateDates = {};
+  pilatesEvents.forEach(e => {
+    const endTime = e.end || new Date(e.start.getTime() + 3600000);
+    const title = (e.summary || '').toLowerCase();
+    if (title.includes('waitlist') || title.includes('cancelled') || title.includes('pending')) return;
+    if (now < endTime) return; // not yet completed
+    const ds = dateStr(new Date(e.start.getFullYear(), e.start.getMonth(), e.start.getDate()));
+    pilateDates[ds] = true;
+  });
+
+  if (!Object.keys(pilateDates).length) return;
+
+  document.querySelectorAll('.heatmap-cell[data-date]').forEach(cell => {
+    const ds = cell.dataset.date;
+    if (!pilateDates[ds]) return;
+    const hasPeloton = cell.classList.contains('peloton') || cell.classList.contains('both') || cell.classList.contains('mixed');
+    const hasGym = cell.classList.contains('gym_monster') || cell.classList.contains('both');
+
+    // Remove old equipment class, keep 'today' if present
+    ['peloton','gym_monster','walking','both','pilates','mixed'].forEach(c => cell.classList.remove(c));
+
+    if (hasPeloton && hasGym) cell.classList.add('both'); // gym + peloton wins over mixed
+    else if (hasPeloton) cell.classList.add('mixed');
+    else if (hasGym) cell.classList.add('gym_monster');
+    else cell.classList.add('pilates');
+
+    // Update tooltip
+    cell.title = ds + ' · ' + (hasPeloton ? 'Peloton + Club Pilates' : hasGym ? 'Gym + Club Pilates' : 'Club Pilates');
+  });
 }
 
 // ─────────────────────────────────────────────────────
