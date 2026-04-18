@@ -1116,8 +1116,9 @@ function renderMuscleMap() {
   }
   workedList.sort((a, b) => a.hoursAgo - b.hoursAgo);
   const listEl = document.getElementById('muscle-worked-list');
-  if (!workedList.length) {
+if (!workedList.length) {
     listEl.innerHTML = `<div style="font-size:0.62rem;color:var(--muted);font-family:'JetBrains Mono',monospace;margin-top:4px">No recent gym sessions</div>`;
+    applyPilatesToMuscleMap();
     return;
   }
   listEl.innerHTML = workedList.map(m => {
